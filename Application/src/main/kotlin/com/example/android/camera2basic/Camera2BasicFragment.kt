@@ -312,7 +312,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
 
                 // For still image captures, we use the largest available size.
                 val largest = Collections.max(
-                        Arrays.asList(*map.getOutputSizes(ImageFormat.JPEG)),
+                        listOf(*map.getOutputSizes(ImageFormat.JPEG)),
                         CompareSizesByArea())
                 mImageReader = ImageReader.newInstance(largest.width, largest.height,
                         ImageFormat.JPEG, /*maxImages*/2)
@@ -843,23 +843,30 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
             val w = aspectRatio.width
             val h = aspectRatio.height
 
-            //Make a list of Sizes smaller than max and in the correct ratio, sorted by size
-            var goodChoices = choices.filter {
-                it.width <= maxWidth && it.height <= maxHeight
-                        && it.height == it.width * h / w
-            }.sortedWith(CompareSizesByArea())
-
-            //Find the smallest Size that's bigger than textureView.
-            val smallestBigenoughIndex = goodChoices.indexOfLast { it.width >= textureViewWidth && it.height >= textureViewHeight }
-
-            return when {
-            //Return if a big enough one exists
-                (smallestBigenoughIndex != -1) -> goodChoices[smallestBigenoughIndex]
-            //...or the biggest good one otherwise
-                (!goodChoices.isEmpty()) -> goodChoices[0]
-            //Give up if no good ones, return anything
-                else -> choices[0]
+            val BIG_ENOUGH = "BIG_ENOUGH"
+            val TOO_SMALL = "TOO_SMALL"
+            /**
+             * Keeps sizes smaller than max, and of correct ration
+             */
+            val sizeRatioFilter: (it: Size) -> Boolean = {
+                it.width <= maxWidth && it.height <= maxHeight && it.height == it.width * h / w
             }
+
+            //Make a list of Sizes smaller than max and in the correct ratio, sorted by size
+            val goodChoices = choices
+                    .filter(sizeRatioFilter)
+                    .sortedWith(CompareSizesByArea())
+                    .groupBy {
+                        if (it.width >= textureViewWidth && it.height >= textureViewHeight) BIG_ENOUGH else TOO_SMALL
+                    }
+
+            val bigEnough = goodChoices.get(BIG_ENOUGH)
+            val tooSmall = goodChoices.get(TOO_SMALL)
+
+            Log.i(TAG, "Map: " + goodChoices)
+            //Return the smallest big enough one if it exists, otherwise biggest small one. Just
+            // return first choice if nothing is found
+            return bigEnough?.last() ?: tooSmall?.first() ?: choices[0]
         }
 
         fun newInstance(): Camera2BasicFragment {
