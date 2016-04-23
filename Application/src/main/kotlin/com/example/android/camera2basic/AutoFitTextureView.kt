@@ -25,8 +25,8 @@ import android.view.TextureView
  */
 class AutoFitTextureView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : TextureView(context, attrs, defStyle) {
 
-    private var mRatioWidth = 0
-    private var mRatioHeight = 0
+    private var ratioWidth = 0
+    private var ratioHeight = 0
 
     /**
      * Sets the aspect ratio for this view. The size of the view will be measured based on the ratio
@@ -41,22 +41,22 @@ class AutoFitTextureView @JvmOverloads constructor(context: Context, attrs: Attr
         if (width < 0 || height < 0) {
             throw IllegalArgumentException("Size cannot be negative.")
         }
-        mRatioWidth = width
-        mRatioHeight = height
+        ratioWidth = width
+        ratioHeight = height
         requestLayout()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val width = MeasureSpec.getSize(widthMeasureSpec)
+        val height = MeasureSpec.getSize(heightMeasureSpec);
         when {
-            (0 == mRatioWidth || 0 == mRatioHeight) ->
+            (0 == ratioWidth || 0 == ratioHeight) ->
                 setMeasuredDimension(width, height)
-            (width < height * mRatioWidth / mRatioHeight) ->
-                setMeasuredDimension(width, width * mRatioHeight / mRatioWidth)
+            (width < height * ratioWidth / ratioHeight) ->
+                setMeasuredDimension(width, width * ratioHeight / ratioWidth)
             else ->
-                setMeasuredDimension(height * mRatioWidth / mRatioHeight, height)
+                setMeasuredDimension(height * ratioWidth / ratioHeight, height)
         }
     }
-
 }
