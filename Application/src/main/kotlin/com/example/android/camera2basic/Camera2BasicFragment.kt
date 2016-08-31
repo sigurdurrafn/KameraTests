@@ -39,7 +39,6 @@ import android.util.Size
 import android.util.SparseIntArray
 import android.view.*
 import android.widget.Toast
-import com.example.android.camera2basic.gl.VideoTextureRenderer
 import kotlinx.android.synthetic.main.fragment_camera2_basic.*
 import java.io.File
 import java.io.FileOutputStream
@@ -102,7 +101,6 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
             mCameraOpenCloseLock.release()
             cameraDevice = device
             createCameraPreviewSession()
-            var renderer = VideoTextureRenderer(activity, texture.getSurfaceTexture(), previewSize.width, previewSize.height)
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
@@ -218,15 +216,11 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
             }
         }
 
-        override fun onCaptureProgressed(session: CameraCaptureSession,
-                                         request: CaptureRequest,
-                                         partialResult: CaptureResult) {
+        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
             process(partialResult)
         }
 
-        override fun onCaptureCompleted(session: CameraCaptureSession,
-                                        request: CaptureRequest,
-                                        result: TotalCaptureResult) {
+        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
             process(result)
         }
 
@@ -247,8 +241,8 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        picture.setOnClickListener(this)
-        info.setOnClickListener(this)
+        btn_picture.setOnClickListener(this)
+        btn_info.setOnClickListener(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -285,8 +279,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
         if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
             ConfirmationDialog().show(childFragmentManager, FRAGMENT_DIALOG)
         } else {
-            FragmentCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA),
-                    REQUEST_CAMERA_PERMISSION)
+            FragmentCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
         }
     }
 
@@ -379,11 +372,9 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
                 // We fit the aspect ratio of TextureView to the size of preview we picked.
                 val orientation = resources.configuration.orientation
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    texture.setAspectRatio(
-                            previewSize.width, previewSize.height)
+                    texture.setAspectRatio( previewSize.width, previewSize.height)
                 } else {
-                    texture.setAspectRatio(
-                            previewSize.height, previewSize.width)
+                    texture.setAspectRatio( previewSize.height, previewSize.width)
                 }
 
                 // Check if the flash is supported.
@@ -497,24 +488,20 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
                             captureSession = cameraCaptureSession
                             try {
                                 // Auto focus should be continuous for camera preview.
-                                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-                                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                                previewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                                 // Flash is automatically enabled when necessary.
                                 setAutoFlash(previewRequestBuilder)
 
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequestBuilder = previewRequestBuilder
                                 mPreviewRequest = previewRequestBuilder.build()
-                                captureSession?.setRepeatingRequest(mPreviewRequest,
-                                        mCaptureCallback, backgroundHandler)
+                                captureSession?.setRepeatingRequest(mPreviewRequest, mCaptureCallback, backgroundHandler)
                             } catch (e: CameraAccessException) {
                                 e.printStackTrace()
                             }
-
                         }
 
-                        override fun onConfigureFailed(
-                                cameraCaptureSession: CameraCaptureSession) {
+                        override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
                             showToast("Failed")
                         }
                     }, null)
@@ -628,9 +615,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
 
             val CaptureCallback = object : CameraCaptureSession.CaptureCallback() {
 
-                override fun onCaptureCompleted(session: CameraCaptureSession,
-                                                request: CaptureRequest,
-                                                result: TotalCaptureResult) {
+                override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                     showToast("Saved: " + file)
                     Log.d(TAG, file.toString())
                     unlockFocus()
@@ -669,10 +654,10 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.picture -> {
+            R.id.btn_picture -> {
                 takePicture()
             }
-            R.id.info -> {
+            R.id.btn_info -> {
                 AlertDialog.Builder(activity)
                         .setMessage(R.string.intro_message)
                         .setPositiveButton(android.R.string.ok, null)
@@ -683,8 +668,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
 
     private fun setAutoFlash(requestBuilder: CaptureRequest.Builder) {
         if (mFlashSupported) {
-            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
         }
     }
 
@@ -713,7 +697,6 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
             // We cast here to ensure the multiplications won't overflow
             return java.lang.Long.signum(lhs.width.toLong() * lhs.height - rhs.width.toLong() * rhs.height)
         }
-
     }
 
     /**
@@ -740,7 +723,6 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
                 return dialog
             }
         }
-
     }
 
     /**
@@ -753,12 +735,9 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener, FragmentCompat.On
             return AlertDialog.Builder(activity)
                     .setMessage(R.string.request_permission)
                     .setPositiveButton(android.R.string.ok) { dialog, which ->
-                        FragmentCompat.requestPermissions(parent,
-                                arrayOf(Manifest.permission.CAMERA),
-                                REQUEST_CAMERA_PERMISSION)
+                        FragmentCompat.requestPermissions(parent, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
                     }
-                    .setNegativeButton(android.R.string.cancel
-                    ) { dialog, which ->
+                    .setNegativeButton(android.R.string.cancel) { dialog, which ->
                         activity.finish()
                     }.create()
         }
